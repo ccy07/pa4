@@ -169,14 +169,14 @@ q8 %&gt;%
 
 &lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
 ---
-# Check model diagnostics (1)
-- Eyeball the regression model. The plot shows that the relationship between x and y is basically linear.
+# Check model diagnostics (1) 
+- Check the general pattern: the plot shows that the relationship between x and y is basically linear.
 
 &lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
-# Check model diagnostics (2)
-- The mean of residuals is 1.136591e-14, which is almost equal to zero.
+# Check model diagnostics (2) 
+- Check the mean of residuals: the mean of residuals is 1.136591e-14, which is almost equal to zero.
 
 ```r
 q10 &lt;- lm(formula = cog ~ skewness, data = q8)
@@ -189,6 +189,8 @@ mean(q10$residuals)
 ---
 # Check model diagnostics (3)
 
+Check homoskedasticity and normal distribution: the variance around predicted values is consistent and the distribution of residuals is basiclly normal.
+
 
 ```r
 ds4ling::diagnosis(q10)
@@ -196,8 +198,8 @@ ds4ling::diagnosis(q10)
 
 &lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
 ---
-# Check model diagnostics (4)
-- Cor.test is used to test whether predictor and residuals are correlated or not. The returned p-value is 1 and the null hypothesis cannot be rejected.
+# Check model diagnostics (4) 
+- Check the uncorrelation between predictors and residuals: Cor.test is used to test whether predictor and residuals are correlated or not. The returned p-value is 1 and the null hypothesis cannot be rejected.
 
 
 ```r
@@ -218,15 +220,31 @@ cor.test(q8$skewness, q10$residuals)
 ## -3.024595e-16
 ```
 ---
+# Check model diagnostics (5) 
+
+Check no autocorrelation of residuals: the p-value of Runs test is 0.3581, which is larger than 0.05, thus we can maintain the hypothesis that there is no autocorrelation of residuals.
 
 
+```r
+library("lawstat")
+lawstat::runs.test(q10$residuals)
+```
+
+```
+## 
+## 	Runs Test - Two sided
+## 
+## data:  q10$residuals
+## Standardized Runs Statistic = 0.91894, p-value = 0.3581
+```
+---
 # Write up the results
 
 This study checked the regression assumptions of the current model and it turns out that all assumptions are satisfied. 
 
-For model specification assumptions, the plot in (1) shows that the relationship between x and y is basically linear. 
+The model specification assumption is satisfied. The plot in (1) shows that the relationship between x and y is basically linear. 
 
-For the error term assumptions, (2) displays that the mean of residuals is almost equal to 0; the first plot of (3) illustrates that the variance around predicted values is consistent; the second and third plot of (3) exhibit that the residuals are basically normally distributed; (4) uses cor.test to test if predictor and residuals are correlated and the returned p-value is 1, which is much larger than 0.05, thus we cannot reject the null hypotheses that true correlation is equal to 0 and conclude that predictor and residuals are not correlated.
+The error term assumptions are also satisfied. (2) displays that the mean of residuals is almost equal to 0. The first plot of (3) illustrates that the variance around predicted values is consistent, and the homoskedasticity of residuals is confirmed. The second and third plot of (3) exhibit that the residuals are basically normally distributed. (4) uses the function of cor.test to test if predictor and residuals are correlated. The returned p-value is 1, which is much larger than 0.05, thus we cannot reject the null hypotheses that true correlation is equal to 0 and conclude that predictor and residuals are not correlated. The p-value of runs-test in (5) confirms that there is no autocorrelation of residuals.
 
 
     </textarea>
