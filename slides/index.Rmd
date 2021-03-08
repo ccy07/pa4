@@ -1,0 +1,113 @@
+---
+title: "PA4-ds4ling"
+author: "Chaoyi Chen"
+institute: "Rutgers University"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    css: ["hygge", "rutgers", "rutgers-fonts"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+- Load the dataset from your index.Rmd file.
+```{r}
+fricatives <- read.csv("~/Desktop/pa4/data_raw/fricatives/fricatives.csv") # load the dataset
+fricatives # show the dataset
+```
+---
+- Tidy the data and save the tidy version as a .csv file in data_tidy.
+```{r, warnings=F, message=F,out.width="50%"}                      
+library(tidyverse)
+fricatives_tidy <- pivot_longer(fricatives,c(`s_cog`:`sh_skewness`), names_to = "category", values_to = "values") %>% # turn the four categories into one column
+  separate(category, into = c("phoneme", "kind"), sep = "_") %>% # separate phoneme and kind
+  pivot_wider(names_from = kind, values_from = values) # put cog and skewness back to columns
+fricatives_tidy # show the tidy version
+write_csv(fricatives_tidy,"~/Desktop/pa4/data_tidy/fricatives_tidy.csv") # save the tidy version as a .csv file in data_tidy
+```
+---
+- Provide a table of descriptive statistics.
+```{r, warnings=F, message=F,fig.align='center'}
+summary(fricatives_tidy)
+```
+
+---
+- Make a boxplot of center of gravity as a function of phoneme.
+```{r,fig.width=8,fig.height=5,fig.align='center'}
+fricatives_tidy %>% 
+  ggplot(., mapping = aes(x = phoneme, y = cog)) +
+  geom_boxplot() +
+  stat_summary(mapping = aes(x = phoneme, y = cog),fun.min = min, fun.max = max, fun = median)
+```
+
+
+---
+- Plot skewness as a function of phoneme.
+```{r,fig.width=8,fig.height=5,fig.align='center'}
+fricatives_tidy %>% 
+  ggplot(., mapping = aes(x = phoneme, y = skewness)) +
+  geom_boxplot() +
+  stat_summary(mapping = aes(x = phoneme, y = skewness),fun.min = min, fun.max = max, fun = median)
+```
+---
+- Fit a model that examines center of gravity as a function of skewness for the [s] segments. Make a table of the model summary.
+```{r}
+q8 <- filter(fricatives_tidy, phoneme == "s") # data transformation : pick out [s] data
+  lm(formula = cog ~ skewness, data = q8) %>% # fit a model
+  summary() # make a table
+```
+---
+- Make a scatter plot that illustrates the relationship in (8).
+```{r,fig.width=8,fig.height=5,fig.align='center'}
+q8 %>% 
+  ggplot(., mapping = aes(x = skewness, y = cog)) +
+  geom_point() +
+  geom_smooth(method = lm)
+```
+---
+# Check model diagnostics (1)
+- Eyeball the regression model. The plot shows that the relationship between x and y is basically linear.
+
+```{r,fig.width=8,fig.height=5,echo=FALSE, message=FALSE, fig.align='center'}
+q8 %>% 
+  ggplot(., mapping = aes(x = skewness, y = cog)) +
+  geom_point() +
+  geom_smooth(method = lm)
+```
+
+---
+# Check model diagnostics (2)
+- The mean of residuals is 1.136591e-14, which is almost equal to zero.
+```{r}
+
+q10 <- lm(formula = cog ~ skewness, data = q8)
+mean(q10$residuals)
+```
+---
+# Check model diagnostics (3)
+
+```{r,fig.width=8,fig.height=5, message=FALSE, warning = FALSE,fig.align='center'}
+ds4ling::diagnosis(q10)
+```
+---
+# Check model diagnostics (4)
+- Cor.test is used to test whether predictor and residuals are correlated or not. The returned p-value is 1 and the null hypothesis cannot be rejected.
+
+```{r}
+cor.test(q8$skewness, q10$residuals)
+```
+---
+
+
+# Write up the results
+
+This study checked the regression assumptions of the current model and it turns out that all assumptions are satisfied. 
+
+For model specification assumptions, the plot in (1) shows that the relationship between x and y is basically linear. 
+
+For the error term assumptions, (2) displays that the mean of residuals is almost equal to 0; the first plot of (3) illustrates that the variance around predicted values is consistent; the second and third plot of (3) exhibit that the residuals are basically normally distributed; (4) uses cor.test to test if predictor and residuals are correlated and the returned p-value is 1, which is much larger than 0.05, thus we cannot reject the null hypotheses that true correlation is equal to 0 and conclude that predictor and residuals are not correlated.
+
+

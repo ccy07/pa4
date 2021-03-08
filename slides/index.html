@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>PA4-ds4ling</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Chaoyi Chen" />
+    <meta name="date" content="2021-03-08" />
+    <script src="libs/header-attrs-2.7.3/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/hygge.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/rutgers.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/rutgers-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# PA4-ds4ling
+### Chaoyi Chen
+### Rutgers University
+### 2021-03-08
+
+---
+
+
+- Load the dataset from your index.Rmd file.
+
+```r
+fricatives &lt;- read.csv("~/Desktop/pa4/data_raw/fricatives/fricatives.csv") # load the dataset
+fricatives # show the dataset
+```
+
+```
+##    obs    s_cog s_skewness   sh_cog sh_skewness
+## 1    1 3285.300 -1.2152771 2408.519 -0.24808262
+## 2    2 4664.371 -1.1854471 2823.398 -0.01652603
+## 3    3 4679.532 -1.0676233 2898.352  0.11767899
+## 4    4 4873.546 -1.0610645 3617.480  0.19782525
+## 5    5 4878.759 -1.0342092 3668.004  0.21182250
+## 6    6 5194.612 -0.9485275 3684.568  0.26240120
+## 7    7 5455.066 -0.9086766 3875.364  0.32381741
+## 8    8 5483.810 -0.8775833 3917.770  0.49351920
+## 9    9 5683.643 -0.8672691 3952.549  0.51046425
+## 10  10 5829.508 -0.8593212 3955.097  0.52176091
+## 11  11 5889.843 -0.7006081 3956.956  0.54122336
+## 12  12 5987.429 -0.6923963 4059.652  0.57436640
+## 13  13 6075.781 -0.6806629 4310.137  0.58929277
+## 14  14 6093.901 -0.6251679 4334.353  0.63240742
+## 15  15 6238.325 -0.6205981 4495.861  0.70971400
+## 16  16 6321.221 -0.5760628 4610.541  0.76650507
+## 17  17 6443.836 -0.5510135 4625.709  0.79969053
+## 18  18 6624.931 -0.5116123 4735.182  1.12553304
+## 19  19 7011.781 -0.3184417 4880.020  1.42249690
+## 20  20 7095.281 -0.1268600 5086.944  1.51867946
+```
+---
+- Tidy the data and save the tidy version as a .csv file in data_tidy.
+
+```r
+library(tidyverse)
+fricatives_tidy &lt;- pivot_longer(fricatives,c(`s_cog`:`sh_skewness`), names_to = "category", values_to = "values") %&gt;% # turn the four categories into one column
+  separate(category, into = c("phoneme", "kind"), sep = "_") %&gt;% # separate phoneme and kind
+  pivot_wider(names_from = kind, values_from = values) # put cog and skewness back to columns
+fricatives_tidy # show the tidy version
+```
+
+```
+## # A tibble: 40 x 4
+##      obs phoneme   cog skewness
+##    &lt;int&gt; &lt;chr&gt;   &lt;dbl&gt;    &lt;dbl&gt;
+##  1     1 s       3285.  -1.22  
+##  2     1 sh      2409.  -0.248 
+##  3     2 s       4664.  -1.19  
+##  4     2 sh      2823.  -0.0165
+##  5     3 s       4680.  -1.07  
+##  6     3 sh      2898.   0.118 
+##  7     4 s       4874.  -1.06  
+##  8     4 sh      3617.   0.198 
+##  9     5 s       4879.  -1.03  
+## 10     5 sh      3668.   0.212 
+## # … with 30 more rows
+```
+
+```r
+write_csv(fricatives_tidy,"~/Desktop/pa4/data_tidy/fricatives_tidy.csv") # save the tidy version as a .csv file in data_tidy
+```
+---
+- Provide a table of descriptive statistics.
+
+```r
+summary(fricatives_tidy)
+```
+
+```
+##       obs          phoneme               cog          skewness      
+##  Min.   : 1.00   Length:40          Min.   :2409   Min.   :-1.2153  
+##  1st Qu.: 5.75   Class :character   1st Qu.:3954   1st Qu.:-0.7403  
+##  Median :10.50   Mode  :character   Median :4707   Median :-0.1875  
+##  Mean   :10.50                      Mean   :4843   Mean   :-0.1093  
+##  3rd Qu.:15.25                      3rd Qu.:5845   3rd Qu.: 0.5266  
+##  Max.   :20.00                      Max.   :7095   Max.   : 1.5187
+```
+
+---
+- Make a boxplot of center of gravity as a function of phoneme.
+
+```r
+fricatives_tidy %&gt;% 
+  ggplot(., mapping = aes(x = phoneme, y = cog)) +
+  geom_boxplot() +
+  stat_summary(mapping = aes(x = phoneme, y = cog),fun.min = min, fun.max = max, fun = median)
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-4-1.png" style="display: block; margin: auto;" /&gt;
+
+
+---
+- Plot skewness as a function of phoneme.
+
+```r
+fricatives_tidy %&gt;% 
+  ggplot(., mapping = aes(x = phoneme, y = skewness)) +
+  geom_boxplot() +
+  stat_summary(mapping = aes(x = phoneme, y = skewness),fun.min = min, fun.max = max, fun = median)
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" /&gt;
+---
+- Fit a model that examines center of gravity as a function of skewness for the [s] segments. Make a table of the model summary.
+
+```r
+q8 &lt;- filter(fricatives_tidy, phoneme == "s") # data transformation : pick out [s] data
+  lm(formula = cog ~ skewness, data = q8) %&gt;% # fit a model
+  summary() # make a table
+```
+
+```
+## 
+## Call:
+## lm(formula = cog ~ skewness, data = q8)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1060.74   -21.72    58.96   123.00   405.24 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   8027.2      212.3   37.80  &lt; 2e-16 ***
+## skewness      3029.1      259.1   11.69 7.69e-10 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 320.1 on 18 degrees of freedom
+## Multiple R-squared:  0.8836,	Adjusted R-squared:  0.8771 
+## F-statistic: 136.6 on 1 and 18 DF,  p-value: 7.691e-10
+```
+---
+- Make a scatter plot that illustrates the relationship in (8).
+
+```r
+q8 %&gt;% 
+  ggplot(., mapping = aes(x = skewness, y = cog)) +
+  geom_point() +
+  geom_smooth(method = lm)
+```
+
+```
+## `geom_smooth()` using formula 'y ~ x'
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
+---
+# Check model diagnostics (1)
+- Eyeball the regression model. The plot shows that the relationship between x and y is basically linear.
+
+&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Check model diagnostics (2)
+- The mean of residuals is 1.136591e-14, which is almost equal to zero.
+
+```r
+q10 &lt;- lm(formula = cog ~ skewness, data = q8)
+mean(q10$residuals)
+```
+
+```
+## [1] 1.136591e-14
+```
+---
+# Check model diagnostics (3)
+
+
+```r
+ds4ling::diagnosis(q10)
+```
+
+&lt;img src="index_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
+---
+# Check model diagnostics (4)
+- Cor.test is used to test whether predictor and residuals are correlated or not. The returned p-value is 1 and the null hypothesis cannot be rejected.
+
+
+```r
+cor.test(q8$skewness, q10$residuals)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  q8$skewness and q10$residuals
+## t = -1.2832e-15, df = 18, p-value = 1
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  -0.4425208  0.4425208
+## sample estimates:
+##           cor 
+## -3.024595e-16
+```
+---
+
+
+# Write up the results
+
+This study checked the regression assumptions of the current model and it turns out that all assumptions are satisfied. 
+
+For model specification assumptions, the plot in (1) shows that the relationship between x and y is basically linear. 
+
+For the error term assumptions, (2) displays that the mean of residuals is almost equal to 0; the first plot of (3) illustrates that the variance around predicted values is consistent; the second and third plot of (3) exhibit that the residuals are basically normally distributed; (4) uses cor.test to test if predictor and residuals are correlated and the returned p-value is 1, which is much larger than 0.05, thus we cannot reject the null hypotheses that true correlation is equal to 0 and conclude that predictor and residuals are not correlated.
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
