@@ -26,7 +26,7 @@ fricatives_tidy <- pivot_longer(fricatives,c(`s_cog`:`sh_skewness`), names_to = 
   separate(category, into = c("phoneme", "kind"), sep = "_") %>% # separate phoneme and kind
   pivot_wider(names_from = kind, values_from = values) # put cog and skewness back to columns
 fricatives_tidy # show the tidy version
-write_csv(fricatives_tidy,"~/Desktop/pa4/data_tidy/fricatives_tidy.csv") # save the tidy version as a .csv file in data_tidy
+write.csv(fricatives_tidy,"~/Desktop/pa4/data_tidy/fricatives_tidy.csv") # save the tidy version as a .csv file in data_tidy
 ```
 ---
 - Provide a table of descriptive statistics.
